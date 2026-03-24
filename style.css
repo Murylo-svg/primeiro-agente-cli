@@ -1,0 +1,101 @@
+/* Custom styles for extra beauty */
+:root {
+    --glow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.dark-theme {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+body.light-theme {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: black; /* LETRA PRETA NO LIGHT */
+}
+
+body.light-theme header,
+body.light-theme .bg-white\/10,
+body.light-theme .bg-white\/5,
+body.light-theme .bg-white\/20 {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: black !important; /* PRETO */
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme input,
+body.light-theme select,
+body.light-theme select option {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: black !important; /* PRETO */
+    border-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+body.light-theme input::placeholder {
+    color: #666 !important;
+}
+
+body.light-theme .text-white,
+body.light-theme .text-white\/80,
+body.light-theme .text-white\/50,
+body.light-theme .text-white\/40,
+body.light-theme .text-white\/30 {
+    color: black !important; /* TUDO PRETO NO LIGHT */
+}
+
+/* Dark theme dropdown */
+body.dark-theme select#modelSelect {
+    background: rgba(30, 30, 46, 0.9) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+body.dark-theme select#modelSelect option {
+    background: rgba(30, 30, 46, 0.9) !important;
+    color: white !important;
+}
+
+body.dark-theme select#modelSelect:focus {
+    border-color: rgba(99, 102, 241, 0.8) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+#messages {
+    scroll-behavior: smooth;
+}
+
+#messages > div {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.backdrop-blur-md {
+    backdrop-filter: blur(20px);
+}
+
+button:hover, input:focus, select:focus {
+    box-shadow: var(--glow) !important;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem !important;
+    }
+    main {
+        padding: 1rem !important;
+    }
+}
+

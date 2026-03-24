@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Agente Gemini - Interface Bonita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-md shadow-xl border-b border-white/20 p-6 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+            <i class="fas fa-robot mr-3"></i>Agente Gemini
+        </h1>
+        <p class="text-xl text-white/80">Interface bonita para conversar com IA</p>
+    </header>
+
+    <!-- Main Chat Area -->
+    <main class="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-8">
+        <!-- Controls: Theme + Model Selector -->
+        <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+            <!-- Theme Toggle -->
+            <button id="themeToggle" class="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl text-white transition-all duration-300 shadow-lg hover:scale-105 order-2 sm:order-1">
+                <i class="fas fa-moon text-xl"></i>
+            </button>
+            <!-- Model Selector -->
+            <div class="flex items-center gap-2 order-1 sm:order-2">
+                <label class="text-white/80 font-semibold text-sm sm:text-base whitespace-nowrap">Modelo:</label>
+                <select id="modelSelect" class="bg-white/20 border border-white/30 rounded-2xl px-4 py-3 text-white text-sm sm:text-base focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transition-all duration-300 backdrop-blur-sm min-w-[200px]">
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rápido)</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Poderoso)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="messages" class="flex-1 bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-6 mb-8 overflow-y-auto max-h-96 md:max-h-[500px] space-y-4">
+            <div class="text-center py-8">
+                <i class="fas fa-comments text-6xl text-white/30 mb-4"></i>
+                <p class="text-xl text-white/50">Comece uma conversa com o agente Gemini!</p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-white/20">
+            <div class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Digite sua mensagem aqui... (Ex: Fale como fazer um site básico com sotaque baiano)" 
+                    class="flex-1 bg-white/20 border border-white/30 rounded-2xl px-6 py-4 text-white placeholder-white/70 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transition-all duration-300 text-lg backdrop-blur-sm"
+                >
+                <button 
+                    id="sendBtn" 
+                    class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 text-lg"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                    Enviar
+                </button>
+            </div>
+            <p id="currentModel" class="text-xs text-white/40 mt-2 text-center">Modelo: <span id="modelDisplay">Gemini 2.5 Flash</span></p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/5 backdrop-blur-md border-t border-white/10 p-4 text-center text-white/50 text-sm">
+        Feito com ❤️ por Murylo | Interface bonita para o bot Gemini
+    </footer>
+
+    <script>
+        const messages = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const themeToggle = document.getElementById('themeToggle');
+
+        let isDark = true;
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            if (isDark) {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                themeToggle.innerHTML = '<i class="fas fa-moon text-xl"></i>';
+            } else {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                themeToggle.innerHTML = '<i class="fas fa-sun text-xl"></i>';
+            }
+        });
+
+        // Send Message
+        async function sendMessage() {
+            const prompt = messageInput.value.trim();
+            const model = document.getElementById('modelSelect').value;
+            if (!prompt) return;
+
+            // Add user message with model
+            addMessage(`Você (${model})`, prompt, 'user');
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, model })
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                addMessage(`🤖 Gemini (${data.model})`, data.response, 'bot');
+            } catch (error) {
+                addMessage('Erro', `Erro: ${error.message}`, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
+            }
+        }
+
+        function addMessage(author, text, type) {
+            const div = document.createElement('div');
+            div.className = `p-6 rounded-2xl shadow-lg transform transition-all duration-300 ${
+                type === 'user' ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white ml-auto max-w-lg' :
+                type === 'bot' ? 'bg-white/10 backdrop-blur-md text-white border border-white/20 max-w-lg' :
+                'bg-red-500/80 text-white ml-auto max-w-lg'
+            }`;
+            
+            div.innerHTML = `
+                <div class="font-semibold mb-2 flex items-center gap-2">
+                    ${type === 'user' ? '<i class="fas fa-user"></i>' : type === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-exclamation-triangle"></i>'}
+                    ${author}
+                </div>
+                <p class="whitespace-pre-wrap">${text}</p>
+            `;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            messages.querySelector('.text-center')?.remove();
+        }
+
+        // Update model display
+        document.getElementById('modelSelect').addEventListener('change', (e) => {
+            document.getElementById('modelDisplay').textContent = e.target.options[e.target.selectedIndex].text;
+        });
+
+        // Events
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
